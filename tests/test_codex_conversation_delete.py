@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gc
 import hashlib
 import json
 import os
@@ -8,6 +9,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -114,7 +116,18 @@ class CliTest(unittest.TestCase):
         self.fixture = CodexHomeFixture(Path(self.tmp.name)).build()
 
     def tearDown(self) -> None:
-        self.tmp.cleanup()
+        for _ in range(5):
+            try:
+                self.tmp.cleanup()
+                return
+            except PermissionError:
+                gc.collect()
+                time.sleep(0.2)
+        try:
+            self.tmp.cleanup()
+        except PermissionError:
+            if os.name != "nt":
+                raise
 
     def run_cli(self, *args: str, env: dict[str, str] | None = None, check: bool = True) -> subprocess.CompletedProcess:
         cmd = [sys.executable, str(SCRIPT), "--json", "--codex-home", str(self.fixture.codex_home), *args]
