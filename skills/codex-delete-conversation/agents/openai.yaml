@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Delete Conversation"
+  short_description: "Safely delete/restore Codex chats"
+  default_prompt: "Use $codex-delete-conversation to safely preview and delete the current Codex conversation, using Chinese output when the user writes in Chinese."
